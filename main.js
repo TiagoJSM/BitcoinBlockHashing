@@ -26,6 +26,14 @@ function getBlock(id, callback){
 function reverseHexString(s){
 	return s.match(/.{2}/g).reverse().join("");
 }
+
+function doubleHash(data){
+	var hashed = 
+		crypto.createHash('sha256').update(
+			crypto.createHash('sha256').update(data).digest())
+			.digest("hex");
+	return hashed;
+}
 	
 function buildBlockHeader(genesisBlock){
 	var buffer = new Buffer(4);
@@ -42,13 +50,33 @@ function buildBlockHeader(genesisBlock){
 }
 	
 function verifyHash(genesisBlock){
+	console.log("");
+	console.log("");
+	var a = new Buffer(reverseHexString(genesisBlock.tx[0]), 'hex');
+	var b = new Buffer(reverseHexString(genesisBlock.tx[1]), 'hex');
+	var buffers = [a, b];
+	//console.log(buffers);
+	//console.log(Buffer.concat(buffers));
+	//console.log(reverseHexString( genesisBlock.tx[0] ) + " " + reverseHexString( genesisBlock.tx[1] ));
+	//console.log(reverseHexString( genesisBlock.tx[0] ) + reverseHexString( genesisBlock.tx[1] ));
+	console.log("");
+	console.log("");
+	console.log(reverseHexString(doubleHash(Buffer.concat(buffers))));
+	
+	/*console.log( 
+		doubleHash( 
+			new Buffer( 
+				reverseHexString(
+					new Buffer( reverseHexString( genesisBlock.tx[0], 'hex' ) ) ) 
+					new Buffer( reverseHexString( genesisBlock.tx[1], 'hex' ) ) ) ), 'hex') ) );*/
+	
+	console.log("");
+	console.log("");
+	
 	var blockHeader = buildBlockHeader(genesisBlock);
 	var buffer = new Buffer(blockHeader, 'hex');
 
-	var data = 
-		crypto.createHash('sha256').update(
-			crypto.createHash('sha256').update(buffer).digest())
-			.digest("hex");
+	var data = doubleHash(buffer);
 
 	return reverseHexString(data) == genesisBlock.hash;
 }
